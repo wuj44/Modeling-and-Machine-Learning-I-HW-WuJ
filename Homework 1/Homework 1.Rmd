@@ -19,7 +19,7 @@ Consider making the linear classifier more flexible, by adding squared terms for
 
 Describe how this more flexible model affects the bias-variance tradeoff
 
-`The more flexible model introduces higher variance and makes the bias decrease for training data.`
+`A more flexible model means the model with higher degree of freedom that can better fit various given training data. The bias-variance tradeoff enforces a tradeoff between a model's flexibility and its generalization. The bias measures how far the expectations of predicted values deviates from the true values, which characterizes the fitting ability of the learning algorithm itself. The variance measures the degree of data deviation between the expectations of predicted values and predicted values, which indicates a high variance makes data points spread out from the mean more. In this case, we apply polynomial regression by adding squared terms for x1 and x2. It adds higher powers of features, which increases the degree of freedom of the model for capturing non-linear changes in the data. When adding high-order terms, it also increases the complexity of the model. As the complexity of the model increases, the capacity of the model and the ability to fit the data increase, which can further reduce the training error, but the risk of overfitting also increases. In other words, the more flexible model introduces higher variance and makes the bias decrease for training data.`
 
 ```{r message=FALSE}
 library('class')
