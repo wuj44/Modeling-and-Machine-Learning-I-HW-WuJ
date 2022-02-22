@@ -1,0 +1,253 @@
+---
+title: "Homework 4"
+author: "Jingyuan Wu"
+date: "2/16/2022"
+output: github_document
+---
+
+# Instructions
+Using the RMarkdown/knitr/github mechanism, complete the following exercises from chapter 4, section 4.7 (beginning pp 168) or the https://www.statlearning.com/:
+
+Exercise 4: "When the number of features p is large, there tends to be a deterioration in the performance of KNN and other local approaches that perform prediction using only observations..." Please type your solutions within your R Markdown document. No R coding is required for this exercise.
+
+Exercise 10: "This question should be answered using the Weekly data set, which is part of the ISLR package. This data is similar..." This exercise requires R coding.
+
+# Solution
+
+Exercise 4:
+
+(a) Suppose that we have a set of observations, each with measurements on p = 1 feature, X. We assume that X is uniformly
+(evenly) distributed on [0, 1]. Associated with each observation
+is a response value. Suppose that we wish to predict a test observation’s response using only observations that are within 10 % of the range of X closest to that test observation. For instance, in order to predict the response for a test observation with X = 0.6, we will use observations in the range [0.55, 0.65]. On average, what fraction of the available observations will we use to make the prediction?
+
+- When $x\in[0.05,0.95]$, we will use observations in the range $[x+0.05, x-0.05]$. It means 10% of the available observations will be used for making the prediction. When $x<0.05$, we will take $[0,x+0.05]$, which represents $(100x+5)%$. When $x>0.95$, we will take $[x-0.05, 1]$, which represents $(105-100x)%$. On average, it is $\int_{0.05}^{0.95} 10 dx + \int_{0}^{0.05} (100x+5) dx + \int_{0.95}^{1} (105-100) dx = 9.75$. In conclusion, the average fraction of the available observations we will use to make the prediction is 9.75%.
+
+(b) Now suppose that we have a set of observations, each with
+measurements on p = 2 features, X1 and X2. We assume that
+(X1, X2) are uniformly distributed on [0, 1] × [0, 1]. We wish to predict a test observation’s response using only observations that are within 10 % of the range of X1 and within 10 % of the range of X2 closest to that test observation. For instance, in order to predict the response for a test observation with X1 = 0.6 and X2 = 0.35, we will use observations in the range [0.55, 0.65] for X1 and in the range [0.3, 0.9] for X2. On average, what fraction of the available observations will we use to make the prediction?
+
+- Assume $X1$ and $X2$ are independent, the fraction will be $9.75\% \times 9.75\% = 0.950625\%$.
+
+(c) Now suppose that we have a set of observations on p = 100 features. Again the observations are uniformly distributed on each feature, and again each feature ranges in value from 0 to 1. We wish to predict a test observation’s response using observations within the 10 % of each feature’s range that is closest to that test observation. What fraction of the available observations will we use to make the prediction?
+
+- It can be $9.75\%^{100}$.
+
+(d) Using your answers to parts (a)–(c), argue that a drawback of KNN when p is large is that there are very few training observations “near” any given test observation.
+
+- Based on question a-c, the fraction of available observations we will use to make the prediction is $9.75\%^{p}$. As p is large, we assume that $\lim_{p \to +\infty}9.75\%^{p}=0$.
+
+(e) Now suppose that we wish to make a prediction for a test observation by creating a p-dimensional hypercube centered around the test observation that contains, on average, 10 % of the training observations. For p = 1, 2, and 100, what is the length of each side of the hypercube? Comment on your answer.
+
+- When p=1, l=0.1, when p=2, l=$0.1^{1/2}$, when p=100, l=$0.1^{1/100}$.
+
+Exercise 10:
+
+This question should be answered using the Weekly data set, which is part of the ISLR2 package. This data is similar in nature to the Smarket data from this chapter’s lab, except that it contains 1,089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+(a) Produce some numerical and graphical summaries of the Weekly
+data. Do there appear to be any patterns?
+
+```{r, message=FALSE, warning=FALSE}
+library(ISLR)
+library(tidyverse)
+library(Hmisc)
+summary(Weekly)
+dim(Weekly)
+rcorr(as.matrix(Weekly[,1:8]))
+plot(Weekly$Volume)
+```
+
+- After checking the correlation of numerical variables, I find that only the volume (the relationship between volume and year) can be valuable in graphical summaries. Therefore, I create a scatter plot to show the patter of the volume. We can see that when time passed, the volume increased.
+
+(b) Use the full data set to perform a logistic regression with
+Direction as the response and the five lag variables plus Volume
+as predictors. Use the summary function to print the results. Do
+any of the predictors appear to be statistically significant? If so, which ones?
+
+```{r}
+fit.glm <- glm(Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 + Volume, data = Weekly, family = binomial)
+summary(fit.glm)
+```
+
+- We can see that Lag2 is statistically significant since its p value is the only one greater than 0.05.
+
+(c) Compute the confusion matrix and overall fraction of correct
+predictions. Explain what the confusion matrix is telling you
+about the types of mistakes made by logistic regression.
+
+```{r}
+probs <- predict(fit.glm, type = "response")
+pred.glm <- rep(NA, length(Weekly$Direction))
+pred.glm[probs <= 0.5] = "Down"
+pred.glm[probs > 0.5] = "Up"
+confusion_matrix=table(pred.glm, Weekly$Direction)
+confusion_matrix
+
+accuracy=(confusion_matrix[1,1]+confusion_matrix[2,2])/length(Weekly$Direction)
+print(paste("accuracy:", accuracy))
+
+training_error_rate=(confusion_matrix[2,1]+confusion_matrix[1,2])/length(Weekly$Direction)
+print(paste("training error rate:", training_error_rate))
+
+precision=confusion_matrix[1,1]/(confusion_matrix[1,1]+confusion_matrix[2,2])
+print(paste("precision:", precision))
+
+recall=confusion_matrix[1,1]/(confusion_matrix[1,1]+confusion_matrix[1,2])
+print(paste("recall:", recall))
+
+F1_score=2*precision*recall/(precision+recall)
+print(paste("F1 score:", F1_score))
+```
+
+- We can see in the confusion matrix that there are 59 samples in Down and 557 samples in Up are correctly predicted. 930 Up samples are mistakenly predicted to be Down. 98 Down samples are mistakenly predicted to be Up.
+
+(d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+
+```{r}
+train <- Weekly %>% filter(1990<=Year & Year<=2008)
+test <- Weekly %>% filter(2009<=Year & Year<=2010)
+fit.glm2 <- glm(Direction ~ Lag2, data = train, family = binomial)
+#summary(fit.glm2)
+probs2 <- predict(fit.glm2, test, type = "response")
+pred.glm2 <- rep(NA, length(test$Direction))
+pred.glm2[probs2 <= 0.5] = "Down"
+pred.glm2[probs2 > 0.5] = "Up"
+confusion_matrix2=table(pred.glm2, test$Direction)
+confusion_matrix2
+
+accuracy2=(confusion_matrix2[1,1]+confusion_matrix2[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy2))
+```
+
+(e) Repeat (d) using LDA.
+
+```{r, message=FALSE, warning=FALSE}
+library(MASS)
+fit.lda <- lda(Direction ~ Lag2, data = train, family = binomial)
+#fit.lda
+pred.lda <- predict(fit.lda, test, type = "response")
+confusion_matrix3=table(pred.lda$class, test$Direction)
+confusion_matrix3
+
+accuracy3=(confusion_matrix3[1,1]+confusion_matrix3[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy3))
+```
+
+(f) Repeat (d) using QDA.
+
+```{r}
+fit.qda <- qda(Direction ~ Lag2, data = train, family = binomial)
+pred.qda <- predict(fit.qda, test, type = "response")
+confusion_matrix4=table(pred.qda$class, test$Direction)
+confusion_matrix4
+
+accuracy4=(confusion_matrix4[1,1]+confusion_matrix4[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy4))
+```
+
+(g) Repeat (d) using KNN with K = 1.
+
+```{r}
+library(class)
+train.X <- as.matrix(train$Lag2)
+test.X <- as.matrix(test$Lag2)
+train.y <- train$Direction
+set.seed(1234)
+pred.knn <- knn(train.X, test.X, train.y, k = 1)
+confusion_matrix5=table(pred.knn, test$Direction)
+confusion_matrix5
+
+accuracy5=(confusion_matrix5[1,1]+confusion_matrix5[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy5))
+```
+
+
+(h) Repeat (d) using naive Bayes.
+
+```{r, message=FALSE, warning=FALSE}
+library(e1071)
+fit.naiveBayes <- naiveBayes(Direction ~ Lag2, data = train)
+#fit.naiveBayes
+pred.naiveBayes <- predict(fit.naiveBayes, test)
+confusion_matrix6=table(pred.naiveBayes, test$Direction)
+confusion_matrix6
+
+accuracy6=(confusion_matrix6[1,1]+confusion_matrix6[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy6))
+```
+
+
+(i) Which of these methods appears to provide the best results on this data?
+
+- By comparing the accuracy, we can see that the accuracy scores of those models are LDA = Logistic Regression > QDA = Naive Bayes > KNN. We can conclude that LDA and logistic regression appears to provide the best results on this data.
+
+(j) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+```{r}
+# logistic regression with Lag2:Lag1
+fit.glm7 <- glm(Direction ~ Lag2:Lag1, data = train, family = binomial)
+probs7 <- predict(fit.glm7, test, type = "response")
+pred.glm7 <- rep(NA, length(test$Direction))
+pred.glm7[probs7 <= 0.5] = "Down"
+pred.glm7[probs7 > 0.5] = "Up"
+confusion_matrix7=table(pred.glm7, test$Direction)
+confusion_matrix7
+
+accuracy7=(confusion_matrix7[1,1]+confusion_matrix7[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy7))
+```
+
+```{r}
+# LDA with Lag2:Lag1
+fit.lda8 <- lda(Direction ~ Lag2:Lag1, data = train, family = binomial)
+pred.lda8 <- predict(fit.lda8, test, type = "response")
+confusion_matrix8=table(pred.lda8$class, test$Direction)
+confusion_matrix8
+
+accuracy8=(confusion_matrix8[1,1]+confusion_matrix8[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy8))
+```
+
+```{r}
+# QDA with sqrt(abs(Lag2))
+fit.qda9 <- qda(Direction ~ Lag2+sqrt(abs(Lag2)), data = train, family = binomial)
+pred.qda9 <- predict(fit.qda9, test, type = "response")
+confusion_matrix9=table(pred.qda9$class, test$Direction)
+confusion_matrix9
+
+accuracy9=(confusion_matrix9[1,1]+confusion_matrix9[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy9))
+```
+
+```{r}
+# KNN with k = 10
+set.seed(1234)
+pred.knn10 <- knn(train.X, test.X, train.y, k = 10)
+confusion_matrix10=table(pred.knn10, test$Direction)
+confusion_matrix10
+
+accuracy10=(confusion_matrix10[1,1]+confusion_matrix10[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy10))
+```
+
+```{r}
+# KNN with k = 100
+set.seed(1234)
+pred.knn100 <- knn(train.X, test.X, train.y, k = 100)
+confusion_matrix100=table(pred.knn100, test$Direction)
+confusion_matrix100
+
+accuracy100=(confusion_matrix100[1,1]+confusion_matrix100[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy100))
+```
+
+```{r, warning=FALSE}
+# Naive Bayes with sqrt(abs(Lag2))
+fit.naiveBayes11 <- naiveBayes(Direction ~ Lag2+sqrt(abs(Lag2)), data = train)
+pred.naiveBayes11 <- predict(fit.naiveBayes11, test)
+confusion_matrix11=table(pred.naiveBayes11, test$Direction)
+confusion_matrix11
+
+accuracy11=(confusion_matrix11[1,1]+confusion_matrix11[2,2])/length(test$Direction)
+print(paste("accuracy:", accuracy11))
+```
