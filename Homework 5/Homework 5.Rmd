@@ -42,6 +42,9 @@ y_val=val[,2]
 
 
 ```{r}
+y <- mcycle$accel
+x <- mcycle$times
+
 ## k-NN kernel function
 ## x  - n x p matrix of training inputs
 ## x0 - 1 x p input where to make prediction
@@ -76,9 +79,27 @@ nadaraya_watson <- function(y, x, x0, kern, ...) {
   return(yhat)
 }
 
+## create a grid of inputs 
+x_plot <- matrix(seq(min(x),max(x),length.out=100),100,1)
+
+## make predictions using NW method for k=1, k=10 and k=20
+y_hat_plot_1 <- nadaraya_watson(y, x, x_plot, kern=kernel_k_nearest_neighbors, k=1)
+y_hat_plot_10 <- nadaraya_watson(y, x, x_plot, kern=kernel_k_nearest_neighbors, k=10)
+y_hat_plot_20 <- nadaraya_watson(y, x, x_plot, kern=kernel_k_nearest_neighbors, k=20)
+
+## plot predictions
+plot(x, y, xlab="Time (ms)", ylab="Acceleration (g)")
+lines(x_plot, y_hat_plot_1, col="darkblue", lwd=2) 
+lines(x_plot, y_hat_plot_10, col="darkred", lwd=2) 
+lines(x_plot, y_hat_plot_20, col="darkgreen", lwd=2) 
+legend('bottomright', c('k=1', 'k=10', 'k=20'), cex=0.8, col=c('darkblue', 'darkred', 'darkgreen'), bty='n', lty=1)
+```
+
+
+```{r}
 # print yhat by varying the tuning parameter over a sequence of values
 y_train_hat=vector()
-k=seq(1,100,by=5)
+k=1:20
 for (i in k){
 output=nadaraya_watson(y_train, X_train, X_train, kern=kernel_k_nearest_neighbors, i)
 y_train_hat=c(y_train_hat, output)
@@ -95,10 +116,7 @@ colnames(y_train_hat)=paste0("k=", k)
 
 y_val_hat=matrix(y_val_hat, length(y_val), length(k))
 colnames(y_val_hat)=paste0("k=", k)
-```
 
-
-```{r}
 ## Compute effective df using NW method
 ## y  - n x 1 vector of training outputs
 ## x  - n x p matrix of training inputs
@@ -217,4 +235,4 @@ for (i in 1:length(k)){
 }
 ```
 
-From the plot above, we can see the distribution of average test error with a series of k values and the range of standard deviation of the five estimates from each fold. As k goes up, the CV-estimated test error first goes down and then goes up, while the standard deviation goes down. It means when k is big enough, CV-estimated test error will not deviate much. According to the plot with training error, aic, bic, validation error and the plot above, we can choose 6 for k as when k=6, we can have the model with small training error, aic, bic, validation error, the least CV-estimated test error and the standard deviation is acceptable.
+From the plot above, we can see that the larger the k is, the error first goes down and then goes up and the sd becomes smaller. The selection of k will be a bias-variance tradeoff because when the larger k is, the larger the bias is and the smaller the sd is. When k is larger, the model will be more complex and it will be less sensitive to the noise. Therefore, for this problem, we can choose 3 for k. When k=3, the model has a pair of relatively small average test error and sd.
