@@ -213,7 +213,7 @@ points(k, training_error, pch=19, type='b', col='darkblue')
 points(k, aic_, pch=19, type='l', col='darkred')
 points(k, bic_, pch=25, type='b', col='orange')
 points(k, validation_error, pch=19, type='b', col='darkgreen')
-legend('topright', c('training_error', 'aic', 'bic', 'validation_error'), pch=c(19,19,25,19), cex=0.8, col=c('darkblue', 'darkred', 'orange', 'darkgreen'), bty='n', lty=c(2,1,2,2))
+legend('topleft', c('training_error', 'aic', 'bic', 'validation_error'), pch=c(19,19,25,19), cex=0.8, col=c('darkblue', 'darkred', 'orange', 'darkgreen'), bty='n', lty=c(2,1,2,2))
 ```
 
 ![](Homework-5_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
