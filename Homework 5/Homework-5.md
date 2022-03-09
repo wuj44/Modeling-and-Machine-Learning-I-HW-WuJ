@@ -254,9 +254,12 @@ for (i in 1:length(k)){
 ![](Homework-5_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 From the plot above, we can see that the larger the k is, the error
-first goes down and then goes up and the sd becomes smaller. The
-selection of k will be a bias-variance tradeoff because when the larger
-k is, the larger the bias is and the smaller the sd is. When k is
-larger, the model will be more complex and it will be less sensitive to
-the noise. Therefore, for this problem, we can choose 3 for k. When k=3,
-the model has a pair of relatively small average test error and sd.
+first goes down and then goes up and the standard deviation becomes
+smaller. The selection of k will be a bias-variance tradeoff because
+when the larger the k is, the larger the bias is and the smaller the
+variance is. In addition, Parsimony rule states that we select the
+simplest model that performs within one standard deviation of our best
+model. For a kNN model, higher k means less variance, which is a simpler
+model. Therefore, for this problem, we should select the highest k
+within one standard deviation of k with best error, which indicates 4
+may be a good candidate for k.
