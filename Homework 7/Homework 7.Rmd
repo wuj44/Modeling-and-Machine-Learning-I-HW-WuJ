@@ -123,7 +123,7 @@ cat('Test loss:', score['loss'], "\n")
 ```
 
 ```{r}
-cat('Test accuracy:', score['acc'], "\n")
+cat('Test accuracy:', score['accuracy'], "\n")
 ```
 
 ```{r}
