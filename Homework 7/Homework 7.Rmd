@@ -284,7 +284,6 @@ plot_predictions <- function(fit, dat=mixture.example) {
 mod_10 %>% plot_predictions()
 ```
 
-
 ```{r}
 nnet(x=dat$x, y=dat$y, size=10, entropy=TRUE, decay=0) %>% plot_predictions()
 ```
